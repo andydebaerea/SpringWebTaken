@@ -64,16 +64,6 @@ class BrouwerController {
 		brouwer.setAdres(new AdresForm());
 	}
 
-	/*@RequestMapping(value = "toevoegen", method = RequestMethod.GET)
-	public String createForm() {
-		return "brouwers/toevoegen";
-	}
-
-	@RequestMapping(method = RequestMethod.POST)
-	public String create() {
-		logger.info("Brouwer werd aan database toegevoegd");
-		return "redirect:/";
-	}*/
 
 	@RequestMapping("alfabet")
 	public ModelAndView findByFirstLetterForm() {
