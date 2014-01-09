@@ -15,7 +15,7 @@
 						key="alleBrouwers" /></a></li>
 			<li><a href="<c:url value='/brouwers/opnaam'/>"> <fmt:message
 						key="brouwersOpNaam" /></a></li>
-			<li><a href="<c:url value='/brouwers/opalfabet'/>"> <fmt:message
+			<li><a href="<c:url value='/brouwers/alfabet'/>"> <fmt:message
 						key="brouwersOpAlfabet" /></a></li>
 			<li><a href="<c:url value='/brouwers/toevoegen'/>"> <fmt:message
 						key="brouwerToevoegen" /></a></li>

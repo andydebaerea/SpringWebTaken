@@ -7,11 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import be.vdab.entities.Brouwer;
 import be.vdab.services.BrouwerService;
 
 @Controller
@@ -41,7 +44,27 @@ class BrouwerController {
 		return "brouwers/opnaam";
 	}
 
-	@RequestMapping(value = "toevoegen", method = RequestMethod.GET)
+	@RequestMapping("toevoegen")
+	public ModelAndView toevoegen() {
+		return new ModelAndView("brouwers/toevoegen", "brouwer", new Brouwer());
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public String toevoegen(@Valid Brouwer brouwer, BindingResult bindingResult) {
+		if (bindingResult.hasErrors()) {
+			return "brouwers/toevoegen";
+		}
+		brouwerService.create(brouwer);
+		return "redirect:/";
+	}
+
+	@InitBinder("brouwer")
+	public void initBinderBrouwer(DataBinder dataBinder) {
+		Brouwer brouwer = (Brouwer) dataBinder.getTarget();
+		brouwer.setAdres(new AdresForm());
+	}
+
+	/*@RequestMapping(value = "toevoegen", method = RequestMethod.GET)
 	public String createForm() {
 		return "brouwers/toevoegen";
 	}
@@ -50,7 +73,7 @@ class BrouwerController {
 	public String create() {
 		logger.info("Brouwer werd aan database toegevoegd");
 		return "redirect:/";
-	}
+	}*/
 
 	@RequestMapping("alfabet")
 	public ModelAndView findByFirstLetterForm() {
