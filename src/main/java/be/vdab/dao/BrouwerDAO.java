@@ -8,7 +8,7 @@ public interface BrouwerDAO {
 	
 	public Iterable<Brouwer> findall();
 	
-	public Iterable<Brouwer> findByNaam(String beginNaam);
+	public Iterable<Brouwer> findByPartOfNaam(String beginNaam);
 	
 	public Iterable<Brouwer> findByFirstLetter(char eerteLetter);
 }

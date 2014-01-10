@@ -15,4 +15,11 @@ http://www.springframework.org/schema/context/spring-context.xsd'>
 		<property name="password" value="${password}" />
 		<property name="maxIdleTime" value="${maxIdleTime}" />
 	</bean>
+	<bean id='jdbcTemplate' class='org.springframework.jdbc.core.JdbcTemplate'>
+		<constructor-arg ref='dataSource' />
+	</bean>
+	<bean id='namedParameterJdbcTemplate'
+		class='org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate'>
+		<constructor-arg ref='dataSource' />
+	</bean>
 </beans>

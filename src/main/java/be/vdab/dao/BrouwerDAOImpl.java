@@ -1,11 +1,16 @@
 package be.vdab.dao;
 
-import java.util.ArrayList;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import be.vdab.entities.Brouwer;
@@ -14,45 +19,64 @@ import be.vdab.valueobjects.Adres;
 @Repository
 public class BrouwerDAOImpl implements BrouwerDAO {
 	private final Map<Long, Brouwer> brouwers = new ConcurrentHashMap<>();
-	
-	public BrouwerDAOImpl() {
-		brouwers.put(1L, new Brouwer(1L, "Achouffe", new Adres("Route du Village", "32", 6666, "Achouffe-Wibrin"), 10000));
-		brouwers.put(2L, new Brouwer(2L, "Alken", new Adres("Stationstraat", "2", 3570, "Alken"), 950000));
-		brouwers.put(3L, new Brouwer(3L, "Bavik", new Adres("Rijksweg", "33", 8531, "Bavikhove"), 11000));
-	}
-	
-	@Override
-	public void create(Brouwer brouwer) {
-		brouwer.setBrouwerNr(Collections.max(brouwers.keySet()) + 1);
-		brouwers.put(brouwer.getBrouwerNr(), brouwer);
+	private final JdbcTemplate jdbcTemplate;
+	private final FiliaalRowMapper filiaalRowMapper = new FiliaalRowMapper();
+	private final SimpleJdbcInsert simpleJdbcInsert;
+
+	private static final String FIND_ALL_SQL = "select brouwernr, naam, postcode, gemeente, "
+			+ "omzet, straat, huisnr from brouwers";
+	private static final String FIND_BY_NAAM = FIND_ALL_SQL
+			+ " where naam like ?";
+
+	@Autowired
+	public BrouwerDAOImpl(JdbcTemplate jdbcTemplate) {
+		this.jdbcTemplate = jdbcTemplate;
+		simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+		simpleJdbcInsert.withTableName("brouwers");
+		simpleJdbcInsert.usingGeneratedKeyColumns("brouwersNr");
 	}
 
 	@Override
 	public Iterable<Brouwer> findall() {
-		return brouwers.values();
+		return jdbcTemplate.query(FIND_ALL_SQL, filiaalRowMapper);
 	}
 
 	@Override
-	public Iterable<Brouwer> findByNaam(String beginNaam) {
-		List<Brouwer> brouwersByDeelVanNaam = new ArrayList<>();
-		for (Brouwer brouwer : brouwers.values()) {
-			if (brouwer.getNaam().toLowerCase().startsWith(beginNaam.toLowerCase())) {
-				brouwersByDeelVanNaam.add(brouwer);
-			}
-		}
-		return brouwersByDeelVanNaam;
+	public void create(Brouwer brouwer) {
+		Map<String, Object> kolomWaarden = new HashMap<>();
+		kolomWaarden.put("Naam", brouwer.getNaam());
+		kolomWaarden.put("PostCode", brouwer.getAdres().getPostcode());
+		kolomWaarden.put("Gemeente", brouwer.getAdres().getGemeente());
+		kolomWaarden.put("Omzet", brouwer.getOmzet());
+		kolomWaarden.put("Straat", brouwer.getAdres().getStraat());
+		kolomWaarden.put("HuisNr", brouwer.getAdres().getHuisNr());
+		Number brouwerNr = simpleJdbcInsert.executeAndReturnKey(kolomWaarden);
+		brouwer.setBrouwerNr(brouwerNr.longValue());
+	}
+
+	@Override
+	public Iterable<Brouwer> findByPartOfNaam(String beginNaam) {
+		return jdbcTemplate.query(FIND_BY_NAAM, filiaalRowMapper, beginNaam
+				+ "%");
 	}
 
 	@Override
 	public Iterable<Brouwer> findByFirstLetter(char eerteLetter) {
-		List<Brouwer> brouwersByFirstLetter = new ArrayList<>();
-		for (Brouwer brouwer : brouwers.values()) {
-			if (brouwer.getNaam().charAt(0) == eerteLetter) {
-				brouwersByFirstLetter.add(brouwer);
-			}
-		}
-		return brouwersByFirstLetter;
+		return jdbcTemplate.query(FIND_BY_NAAM, filiaalRowMapper, eerteLetter
+				+ "%");
 	}
-	
-	
+
+	private static class FiliaalRowMapper implements RowMapper<Brouwer> {
+		@Override
+		public Brouwer mapRow(ResultSet resultSet, int rowNum)
+				throws SQLException {
+			return new Brouwer(resultSet.getLong("brouwerNr"),
+					resultSet.getString("naam"), new Adres(
+							resultSet.getString("straat"),
+							resultSet.getString("huisNr"),
+							resultSet.getInt("postcode"),
+							resultSet.getString("gemeente")),
+					resultSet.getInt("omzet"));
+		}
+	}
 }
