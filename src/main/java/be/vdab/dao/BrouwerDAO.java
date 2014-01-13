@@ -1,14 +1,10 @@
 package be.vdab.dao;
 
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import be.vdab.entities.Brouwer;
 
-public interface BrouwerDAO {
-	
-	public void create(Brouwer brouwer);
-	
-	public Iterable<Brouwer> findall();
-	
-	public Iterable<Brouwer> findByPartOfNaam(String beginNaam);
-	
-	public Iterable<Brouwer> findByFirstLetter(char eerteLetter);
+public interface BrouwerDAO extends JpaRepository<Brouwer, Long>{
+	Iterable<Brouwer> findByNaamStartingWith(String beginnaam);
 }

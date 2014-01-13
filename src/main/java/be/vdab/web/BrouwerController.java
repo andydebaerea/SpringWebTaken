@@ -71,7 +71,7 @@ class BrouwerController {
 	}
 
 	@RequestMapping(value = "alfabet", method = RequestMethod.GET, params = "letter")
-	public ModelAndView findByFirstLetter(@RequestParam char letter) {
+	public ModelAndView findByFirstLetter(@RequestParam String letter) {
 		ModelAndView modelAndView = new ModelAndView("brouwers/alfabet");
 		modelAndView.addObject("alfabet", alfabet);
 		modelAndView.addObject("brouwers",

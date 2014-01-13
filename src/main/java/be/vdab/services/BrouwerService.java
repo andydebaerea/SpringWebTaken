@@ -9,5 +9,5 @@ public interface BrouwerService {
 	
 	Iterable<Brouwer> findByNaam(String beginNaam);
 	
-	Iterable<Brouwer> findByFirstLetter(char eerteLetter);
+	Iterable<Brouwer> findByFirstLetter(String eerteLetter);
 }
